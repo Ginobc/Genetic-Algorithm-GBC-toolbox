@@ -6,7 +6,27 @@
 This GA toolbox is a free and open-source optimization tool originally developed during Colherinhas' master's dissertation (available in `refs/2016_Master_FERRAMENTA_DE_OTIMIZAÇÃO VIA ALGORITMOS GENÉTICOS COM APLICAÇÕES EM ENGENHARIA.pdf` - Portuguese version).  
 The goal of this toolbox is to search for the minimum or maximum of a specific fitness function using Genetic Algorithms (GAs).
 
-Implementations are currently available in **MATLAB**, **Julia**, and **Python**.
+Implementations are currently available in MATLAB, Julia, and Python.
+
+---
+
+### How to Cite this Toolbox
+
+If you use this toolbox in your work, please cite it as follows:
+
+**In Word documents (e.g., academic papers):**
+> Colherinhas, Gino Bertollucci. *Genetic Algorithm (GA) Toolbox for Optimization*. 2016. Available at: [https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox](https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox). Accessed: April 28, 2025.
+
+**In LaTeX documents:**
+```latex
+@misc{colherinhas2016ga_toolbox,
+  author       = {Gino Bertollucci Colherinhas},
+  title        = {Genetic Algorithm (GA) Toolbox for Optimization},
+  year         = {2016},
+  howpublished = {\url{https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox}},
+  note         = {Accessed: April 28, 2025}
+}
+```
 
 ---
 
@@ -100,7 +120,7 @@ Genetic-Algorithm-GBC-toolbox/
 
 **Settings inside `main.py`:**
 - Select the **mode**:
-  - `'continuous'` for floating-point variables (based on MATLAB logic).
+  - `'continuous'` for floating-point variables.
   - `'discrete'` for grouped/discrete variable optimization.
 - Select the **example function**:
   - `'sphere'`, `'eason'`, `'hadel'`, `'simple'`.
@@ -134,19 +154,6 @@ Upon completion of optimization:
 - A plot is generated showing:
   - Best fitness over generations.
   - Mean fitness evolution over generations.
-
----
-
-## Requirements (Python)
-
-The project uses the following Python libraries:
-- `numpy`
-- `matplotlib`
-
-Install them using:
-```bash
-pip install -r requirements.txt
-```
 
 ---
 
