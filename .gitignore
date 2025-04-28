@@ -1,1 +1,11 @@
-backup
+# Pasta de backups pessoais
+z_backup/
+
+# Caches de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Cache do VSCode (caso use)
+.vscode/
