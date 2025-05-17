@@ -19,3 +19,9 @@ def simple_function(x):
     y = 2*x[0]**2 + 2*x[0]*x[1] + 2*x[1]**2 - 6*x[0]
     bounds = np.array([[-2, 2], [-2, 2]])
     return y, bounds
+
+def real_multiobjective(x):
+    f1 = x[0]**2 + x[1]**2
+    f2 = (x[0] - 2)**2 + (x[1] + 1)**2
+    bounds = np.array([[-2, 4], [-3, 3]])  # faixa que cobre os dois pontos ótimos
+    return [f1, f2], bounds

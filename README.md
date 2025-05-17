@@ -1,170 +1,74 @@
+# Genetic Algorithm GBC Toolbox (Python)
 
-# Genetic Algorithm (GA) Toolbox
+This repository implements a modular and didactic genetic algorithm framework for solving both single-objective and multi-objective optimization problems.
 
-## Overview
+## Structure
 
-This GA toolbox is a free and open-source optimization tool originally developed during Colherinhas' master's dissertation (available in `refs/2016_Master_FERRAMENTA_DE_OTIMIZAÇÃO VIA ALGORITMOS GENÉTICOS COM APLICAÇÕES EM ENGENHARIA.pdf` - Portuguese version).  
-The goal of this toolbox is to search for the minimum or maximum of a specific fitness function using Genetic Algorithms (GAs).
+- `main.py`: Main script to configure and run the optimization.
+- `ga_continuous.py`: Core logic for continuous-variable optimization, includes NSGA-II support.
+- `ga_discrete.py`: Handles discrete-variable optimization.
+- `example.py`: Contains example benchmark functions (single and multi-objective).
+- `requirements.txt`: Python dependencies.
 
-Implementations are currently available in MATLAB, Julia, and Python.
+## Features
 
----
+### General
 
-### How to Cite this Toolbox
+- Modular structure for easy adaptation to new problems.
+- Continuous and discrete modes.
+- Evolutionary operators: selection, crossover, mutation, elitism.
+- Optional population decimation to preserve diversity.
 
-If you use this toolbox in your work, please cite it as follows:
+### Supported Modes
 
-**In Word documents (e.g., academic papers):**
-> Colherinhas, Gino Bertollucci. *Genetic Algorithm (GA) Toolbox for Optimization*. 2016. Available at: [https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox](https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox). Accessed: April 28, 2025.
+- `'traditional'`: Single-objective optimization (e.g., sphere, eason, hadel, simple).
+- `'nsga2'`: Multi-objective optimization (e.g., real_multi) using NSGA-II.
 
-**In LaTeX documents:**
-```latex
-@misc{colherinhas2016ga_toolbox,
-  author       = {Gino Bertollucci Colherinhas},
-  title        = {Genetic Algorithm (GA) Toolbox for Optimization},
-  year         = {2016},
-  howpublished = {\url{https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox}},
-  note         = {Accessed: April 28, 2025}
-}
+### NSGA-II
+
+- Non-dominated sorting of individuals into Pareto fronts.
+- Crowding distance to preserve diversity.
+- Final Pareto front plotting (objective 1 vs objective 2).
+- Best individual shown with corresponding real objective values (not surrogate fitness).
+
+## Usage
+
+### Setup
+
+```bash
+cd python/
+pip install -r requirements.txt
 ```
 
----
+### Configuration
 
-## Project Structure
+In `main.py`, set the parameters at the top:
 
-```
-Genetic-Algorithm-GBC-toolbox/
-├── julia/          # Julia implementation
-│   ├── evolution_strategies.jl
-│   ├── fitness.jl
-│   ├── main.jl
-│   └── newpop.jl
-│
-├── matlab/         # MATLAB implementation
-│   ├── examples/
-│   │   ├── eason_function.m
-│   │   ├── hadel_function.m
-│   │   ├── simple_function.m
-│   │   └── sphere_function.m
-│   ├── fix/
-│   │   ├── evolution_strategies.m
-│   │   ├── newpop.m
-│   │   └── fitness.m
-│   └── main.m
-│
-├── python/         # Python implementation
-│   ├── example.py
-│   ├── ga_continuous.py
-│   ├── ga_discrete.py
-│   ├── main.py
-│   └── requirements.txt
-│
-├── refs/           # Reference material
-│   └── 2016_Master_FERRAMENTA_DE_OTIMIZAÇÃO.pdf
-│
-├── z_backup/       # Personal backup folder (not versioned)
-│
-├── LICENSE
-├── README.md
-└── .gitignore
+```python
+modo = 'continuous'         # 'continuous' or 'discrete'
+modo_otimizacao = 'nsga2'   # 'traditional' or 'nsga2'
+func_name = 'real_multi'    # 'sphere', 'eason', 'hadel', 'simple', 'real_multi'
 ```
 
----
+### Output
 
-## How to Run the GA Toolbox
+- Displays best objective value(s) and input vector.
+- Plots best and mean fitness/objective evolution.
+- Plots Pareto front if in `nsga2` mode.
+- Reports total optimization time.
 
-### MATLAB
+## Example
 
-- Navigate to the `matlab/` folder.
-- Open and run the `main.m` file in MATLAB.
-- When running, select one of the example functions inside `examples/`:
-  - `eason_function.m`
-  - `hadel_function.m`
-  - `simple_function.m`
-  - `sphere_function.m`
-- Configure the number of generations, chromosomes, and probabilities of decimation, elitism, mutation, and crossover.
+To run NSGA-II with the `real_multiobjective` function:
 
-**Evolutionary strategies used:**
-- Roulette-Wheel selection
-- BLX-α crossover
-- Deterministic elitism and decimation.
+```bash
+python main.py
+```
 
----
-
-### Julia
-
-- Navigate to the `julia/` folder.
-- Install the necessary packages by typing:
-  ```julia
-  ] add JLD, Statistics, LinearAlgebra, Printf, Plots
-  ```
-- Run the `main.jl` file.
-- Configure optimization parameters and function bounds within the script.
-
-**Evolutionary strategies implemented:**
-- Roulette-Wheel selection
-- BLX-α crossover
-- Mutation
-- Elitism and decimation.
-
----
-
-### Python
-
-- Navigate to the `python/` folder.
-- Install the requirements:
-  ```bash
-  pip install -r requirements.txt
-  ```
-- Run `main.py` to start the optimization.
-
-**Settings inside `main.py`:**
-- Select the **mode**:
-  - `'continuous'` for floating-point variables.
-  - `'discrete'` for grouped/discrete variable optimization.
-- Select the **example function**:
-  - `'sphere'`, `'eason'`, `'hadel'`, `'simple'`.
-
-### Python Modules
-- `example.py`: Contains example functions translated from MATLAB.
-- `ga_continuous.py`: Genetic Algorithm for continuous (floating point) variables.
-- `ga_discrete.py`: Genetic Algorithm for discrete variable problems, supporting multiple crossover types.
-- `main.py`: Main script to configure and run the GA optimization.
-- `requirements.txt`: List of required Python packages.
-
----
-
-### Evolutionary Strategies in Python
-- **Selection**: Roulette-Wheel selection
-- **Crossover Operators**:
-  - BLX-α crossover (continuous and discrete modes)
-  - One-point crossover (discrete)
-  - Two-point crossover (discrete)
-- **Mutation**: Random generation of new individuals
-- **Elitism**: Preservation of the best-performing individuals
-- **Decimation**: Periodic replacement of a portion of the population
-
----
-
-## Results and Post-Processing
-
-Upon completion of optimization:
-- Elapsed execution time is displayed.
-- The optimal solution found is printed.
-- A plot is generated showing:
-  - Best fitness over generations.
-  - Mean fitness evolution over generations.
-
----
+This will generate two plots:
+1. Objective 1 evolution over generations.
+2. Final Pareto front.
 
 ## License
 
-This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](https://www.gnu.org/licenses/gpl-3.0.html).
-
----
-
-## References
-
-- Gino Bertolucci Colherinhas,  
-  "**Ferramenta de Otimização via Algoritmos Genéticos com Aplicações em Engenharia**" (2016).  
-  Master's dissertation available in the `refs/` folder.
+MIT License.
