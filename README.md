@@ -1,74 +1,187 @@
-# Genetic Algorithm GBC Toolbox (Python)
 
-This repository implements a modular and didactic genetic algorithm framework for solving both single-objective and multi-objective optimization problems.
+# Genetic Algorithm (GA) Toolbox
 
-## Structure
+## Overview
 
-- `main.py`: Main script to configure and run the optimization.
-- `ga_continuous.py`: Core logic for continuous-variable optimization, includes NSGA-II support.
-- `ga_discrete.py`: Handles discrete-variable optimization.
-- `example.py`: Contains example benchmark functions (single and multi-objective).
-- `requirements.txt`: Python dependencies.
+This GA toolbox is a free and open-source optimization tool originally developed during Colherinhas' master's dissertation (available in `refs/2016_Master_FERRAMENTA_DE_OTIMIZAÇÃO VIA ALGORITMOS GENÉTICOS COM APLICAÇÕES EM ENGENHARIA.pdf` - Portuguese version).  
+The goal of this toolbox is to search for the minimum or maximum of a specific fitness function using Genetic Algorithms (GAs).
 
-## Features
+Implementations are currently available in MATLAB, Julia, and Python.
 
-### General
+---
 
-- Modular structure for easy adaptation to new problems.
-- Continuous and discrete modes.
-- Evolutionary operators: selection, crossover, mutation, elitism.
-- Optional population decimation to preserve diversity.
+### How to Cite this Toolbox
 
-### Supported Modes
+If you use this toolbox in your work, please cite it as follows:
 
-- `'traditional'`: Single-objective optimization (e.g., sphere, eason, hadel, simple).
-- `'nsga2'`: Multi-objective optimization (e.g., real_multi) using NSGA-II.
+**In Word documents (e.g., academic papers):**
+> Colherinhas, Gino Bertollucci. *Genetic Algorithm (GA) Toolbox for Optimization*. 2016. Available at: [https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox](https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox). Accessed: April 28, 2025.
 
-### NSGA-II
-
-- Non-dominated sorting of individuals into Pareto fronts.
-- Crowding distance to preserve diversity.
-- Final Pareto front plotting (objective 1 vs objective 2).
-- Best individual shown with corresponding real objective values (not surrogate fitness).
-
-## Usage
-
-### Setup
-
-```bash
-cd python/
-pip install -r requirements.txt
+**In LaTeX documents:**
+```latex
+@misc{colherinhas2016ga_toolbox,
+  author       = {Gino Bertollucci Colherinhas},
+  title        = {Genetic Algorithm (GA) Toolbox for Optimization},
+  year         = {2016},
+  howpublished = {\url{https://github.com/Ginobc/Genetic-Algorithm-GBC-toolbox}},
+  note         = {Accessed: April 28, 2025}
+}
 ```
 
-### Configuration
+---
 
-In `main.py`, set the parameters at the top:
+## Project Structure
 
-```python
-modo = 'continuous'         # 'continuous' or 'discrete'
-modo_otimizacao = 'nsga2'   # 'traditional' or 'nsga2'
-func_name = 'real_multi'    # 'sphere', 'eason', 'hadel', 'simple', 'real_multi'
+```
+Genetic-Algorithm-GBC-toolbox/
+├── julia/          # Julia implementation
+│   ├── evolution_strategies.jl
+│   ├── fitness.jl
+│   ├── main.jl
+│   └── newpop.jl
+│
+├── matlab/         # MATLAB implementation
+│   ├── examples/
+│   │   ├── eason_function.m
+│   │   ├── hadel_function.m
+│   │   ├── simple_function.m
+│   │   └── sphere_function.m
+│   ├── fix/
+│   │   ├── evolution_strategies.m
+│   │   ├── newpop.m
+│   │   └── fitness.m
+│   └── main.m
+│
+├── python/         # Python implementation
+│   ├── example.py
+│   ├── ga_continuous.py
+│   ├── ga_discrete.py
+│   ├── main.py
+│   └── requirements.txt
+│
+├── refs/           # Reference material
+│   └── 2016_Master_FERRAMENTA_DE_OTIMIZAÇÃO.pdf
+│
+├── z_backup/       # Personal backup folder (not versioned)
+│
+├── LICENSE
+├── README.md
+└── .gitignore
 ```
 
-### Output
+---
 
-- Displays best objective value(s) and input vector.
-- Plots best and mean fitness/objective evolution.
-- Plots Pareto front if in `nsga2` mode.
-- Reports total optimization time.
+## How to Run the GA Toolbox
 
-## Example
+### MATLAB
 
-To run NSGA-II with the `real_multiobjective` function:
+- Navigate to the `matlab/` folder.
+- Open and run the `main.m` file in MATLAB.
+- When running, select one of the example functions inside `examples/`:
+  - `eason_function.m`
+  - `hadel_function.m`
+  - `simple_function.m`
+  - `sphere_function.m`
+- Configure the number of generations, chromosomes, and probabilities of decimation, elitism, mutation, and crossover.
 
-```bash
-python main.py
-```
+**Evolutionary strategies used:**
+- Roulette-Wheel selection
+- BLX-α crossover
+- Deterministic elitism and decimation.
 
-This will generate two plots:
-1. Objective 1 evolution over generations.
-2. Final Pareto front.
+---
+
+### Julia
+
+- Navigate to the `julia/` folder.
+- Install the necessary packages by typing:
+  ```julia
+  ] add JLD, Statistics, LinearAlgebra, Printf, Plots
+  ```
+- Run the `main.jl` file.
+- Configure optimization parameters and function bounds within the script.
+
+**Evolutionary strategies implemented:**
+- Roulette-Wheel selection
+- BLX-α crossover
+- Mutation
+- Elitism and decimation.
+
+---
+
+### Python
+
+- Navigate to the `python/` folder.
+- Install the requirements:
+  ```bash
+  pip install -r requirements.txt
+  ```
+- Run `main.py` to start the optimization.
+
+**Settings inside `main.py`:**
+- Select the **mode**:
+  - `'continuous'` for floating-point variables.
+  - `'discrete'` for grouped/discrete variable optimization.
+- Select the **example function**:
+  - `'sphere'`, `'eason'`, `'hadel'`, `'simple'`, `'real_multi'`.
+- Choose the **optimization strategy**:
+  - `'traditional'`: single-objective optimization using fitness transformation.
+  - `'nsga2'`: multi-objective optimization using NSGA-II (**implemented only in Python**).
+
+### Python Modules
+- `example.py`: Contains example functions (single and multi-objective), including `real_multiobjective`.
+- `ga_continuous.py`: Core logic for continuous-variable genetic algorithms. Now integrates both:
+  - Traditional GA (single-objective),
+  - NSGA-II (multi-objective), including:
+    - Non-dominated sorting,
+    - Crowding distance calculation,
+    - Elitist population update based on Pareto fronts.
+- `ga_discrete.py`: Handles discrete variable problems with support for crossover variations.
+- `main.py`: Configures the optimization parameters and manages:
+  - Execution timing,
+  - Plotting of convergence (Best/Mean over generations),
+  - Pareto front visualization for NSGA-II.
+- `requirements.txt`: Lists Python package dependencies.
+
+---
+
+### Evolutionary Strategies in Python
+- **Selection**: Roulette-Wheel selection  
+- **Crossover Operators**:
+  - BLX-α crossover (continuous and discrete)
+  - One-point crossover (discrete)
+  - Two-point crossover (discrete)
+- **Mutation**: Uniform random mutation  
+- **Elitism**: Best individuals are preserved between generations  
+- **Decimation**: Part of the population is periodically regenerated to maintain diversity  
+- **NSGA-II Features**:
+  - Multi-objective evaluation
+  - Non-dominated sorting into Pareto fronts
+  - Crowding distance to maintain solution diversity
+  - Pareto front plotted after final generation
+  - Objective values and corresponding input vector printed after optimization
+
+---
+
+## Results and Post-Processing
+
+Upon completion of optimization:
+- Elapsed execution time is displayed.
+- Fittest inputs and the optimal solution found is printed.
+- A plot is generated showing:
+  - Best fitness over generations.
+  - Mean fitness evolution over generations.
+
+---
 
 ## License
 
-MIT License.
+This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](https://www.gnu.org/licenses/gpl-3.0.html).
+
+---
+
+## References
+
+- Gino Bertolucci Colherinhas,  
+  "**Ferramenta de Otimização via Algoritmos Genéticos com Aplicações em Engenharia**" (2016).  
+  Master's dissertation available in the `refs/` folder.
