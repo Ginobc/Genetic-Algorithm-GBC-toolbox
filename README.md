@@ -54,8 +54,7 @@ Genetic-Algorithm-GBC-toolbox/
 │
 ├── python/         # Python implementation
 │   ├── example.py
-│   ├── ga_continuous.py
-│   ├── ga_discrete.py
+│   ├── ga_core.py
 │   ├── main.py
 │   └── requirements.txt
 │
@@ -129,28 +128,28 @@ Genetic-Algorithm-GBC-toolbox/
   - `'nsga2'`: multi-objective optimization using NSGA-II (**implemented only in Python**).
 
 ### Python Modules
-- `example.py`: Contains example functions (single and multi-objective), including `real_multiobjective`.
-- `ga_continuous.py`: Core logic for continuous-variable genetic algorithms. Now integrates both:
-  - Traditional GA (single-objective),
-  - NSGA-II (multi-objective), including:
-    - Non-dominated sorting,
-    - Crowding distance calculation,
-    - Elitist population update based on Pareto fronts.
-- `ga_discrete.py`: Handles discrete variable problems with support for crossover variations.
-- `main.py`: Configures the optimization parameters and manages:
-  - Execution timing,
-  - Plotting of convergence (Best/Mean over generations),
-  - Pareto front visualization for NSGA-II.
-- `requirements.txt`: Lists Python package dependencies.
+- `example.py`: Contains benchmark functions for testing the GA, including:
+  - Single-objective: `sphere`, `eason`, `hadel`, `simple`
+  - Multi-objective: `real_multiobjective`
+- `ga_core.py`: Unified module that implements:
+  - Traditional GA (single-objective)
+  - NSGA-II (multi-objective)
+  - Continuous and discrete variable handling
+  - All crossover and mutation logic
+- `main.py`: Entry point of the Python implementation.
+  - Configures optimization parameters via `config` dictionary
+  - Selects the mode (`'continuous'` or `'discrete'`)
+  - Handles plotting and result display
+- `requirements.txt`: Lists dependencies.
 
 ---
 
 ### Evolutionary Strategies in Python
 - **Selection**: Roulette-Wheel selection  
 - **Crossover Operators**:
-  - BLX-α crossover (continuous and discrete)
-  - One-point crossover (discrete)
-  - Two-point crossover (discrete)
+  - BLX-α crossover
+  - One-point crossover
+  - Two-point crossover
 - **Mutation**: Uniform random mutation  
 - **Elitism**: Best individuals are preserved between generations  
 - **Decimation**: Part of the population is periodically regenerated to maintain diversity  
