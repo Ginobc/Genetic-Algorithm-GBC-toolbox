@@ -122,7 +122,13 @@ Genetic-Algorithm-GBC-toolbox/
   - `'continuous'` for floating-point variables.
   - `'discrete'` for grouped/discrete variable optimization.
 - Select the **example function**:
-  - `'sphere'`, `'eason'`, `'hadel'`, `'simple'`, `'real_multi'`.
+  - `'sphere'`: standard continuous benchmark function (unimodal, convex).
+  - `'easom'`: multimodal function with a sharp global minimum.
+  - `'hadel'`: nonlinear function combining polynomial and trigonometric terms.
+  - `'simple'`: a parabolic function with cross-product terms.
+  - `'real_multi'`: two-objective continuous function used for NSGA-II testing.
+  - `'discrete_alloy'`: discrete optimization example using integer-indexed variables. Each variable represents a standardized material thickness or dimension. The input vector consists of integer indices, and the evaluation function computes a weighted cost, material strength, and density. The goal is to minimize a cost-strength objective while penalizing high-density solutions, simulating a constrained materials engineering design scenario.
+
 - Choose the **optimization strategy**:
   - `'traditional'`: single-objective optimization using fitness transformation.
   - `'nsga2'`: multi-objective optimization using NSGA-II (**implemented only in Python**).

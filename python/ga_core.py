@@ -1,32 +1,23 @@
 import numpy as np
 
-def newpop(N_ind, CromLim, bounds_shape, Crom, Names_CromLim, config):
+def newpop(N_ind, CromLim, bounds_shape, config):
     if config['modo'] == 'continuous':      # Para contínuo, usa-se limites de variáveis reais
         Ncrom = CromLim.shape[0]
         pop = np.random.uniform(CromLim[:, 0], CromLim[:, 1], size=(N_ind, Ncrom))
-        pop_idx = None
-    elif config['modo'] == 'discrete':      # Para discreto, considera-se índices discretos dos valores possíveis
-        for i in range(bounds_shape):       # Criar valores discretizados manualmente
-            var_name = f"x{i+1}"
-            Names_CromLim.append(var_name)
-            Crom[var_name] = np.linspace(CromLim[i,0], CromLim[i,1], 10)  # 10 níveis discretos entre limites
+        return CromLim, pop, None
     
-        pop_idx = np.zeros((N_ind, len(Names_CromLim)), dtype=int)
-        pop = np.zeros((N_ind, len(Names_CromLim)))
-        CromLim = np.zeros((len(Names_CromLim), 2))
+    elif config['modo'] == 'discrete':      # Para discreto, considera-se índices discretos dos valores possíveis
+        pop_idx = np.zeros((N_ind, bounds_shape), dtype=int)
+        for j in range(bounds_shape):
+            pop_idx[:, j] = np.random.randint(CromLim[j, 0], CromLim[j, 1] + 1, size=N_ind)
+        return CromLim, None, pop_idx
 
-        for j, name in enumerate(Names_CromLim):
-            CromLim[j] = [0, len(Crom[name]) - 1]
-            pop_idx[:, j] = np.random.randint(0, len(Crom[name]), size=N_ind)
-            pop[:, j] = Crom[name][pop_idx[:, j]]
 
-    return CromLim, pop, pop_idx
-
-def fitness(pop, fit_function, config, pop_idx, Crom, Names_CromLim, bounds_shape):
+def fitness(pop, fit_function, config, pop_idx):
     if config['modo'] == 'continuous':
         OUTPUT = np.array([fit_function(ind)[0] for ind in pop])
     elif config['modo'] == 'discrete':
-        OUTPUT = np.array([fit_function([Crom[Names_CromLim[k]][ind[k]] for k in range(bounds_shape)])[0] for ind in pop_idx])
+        OUTPUT = np.array([fit_function(ind)[0] for ind in pop_idx])
     
     if config['modo_otimizacao'] == 'nsga2':
         fit = None  # dummy fitness for compatibility
@@ -34,7 +25,7 @@ def fitness(pop, fit_function, config, pop_idx, Crom, Names_CromLim, bounds_shap
         fit = 1 / (OUTPUT + 10)
     return OUTPUT, fit
 
-def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p_c, N_ind, Crom, CromLim, Names_CromLim, bounds_shape):
+def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p_c, N_ind, CromLim, bounds_shape):
     if config['modo_otimizacao'] != 'nsga2':
         if config['modo'] == 'discrete':
             base = pop_idx
@@ -51,15 +42,16 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
 
         # Initialization
         new_base = np.zeros_like(base)
-        new_pop = np.zeros_like(pop)
-
-        # Elitism
         new_base[:N_elit] = base[sorted_idx[:N_elit]]
-        if config['modo'] == 'discrete':
-            for j in range(bounds_shape):
-                new_pop[:, j] = Crom[Names_CromLim[j]][new_base[:, j]]
-        else:
-            new_pop[:N_elit, :] = new_base[:N_elit, :]
+        # new_pop = np.zeros_like(pop)
+
+        # # Elitism
+        # new_base[:N_elit] = base[sorted_idx[:N_elit]]
+        # if config['modo'] == 'discrete':
+        #     for j in range(bounds_shape):
+        #         new_pop[:, j] = Crom[Names_CromLim[j]][new_base[:, j]]
+        # else:
+        #     new_pop[:N_elit, :] = new_base[:N_elit, :]
 
         # Evolution (Crossover & Mutation)
         i = N_elit
@@ -68,7 +60,6 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
                 pai = base[seleciona[np.random.randint(0, N_ind)]]
                 mae = base[seleciona[np.random.randint(0, N_ind)]]
                 if np.random.rand() <= p_c:
-                    # Reutilizando crossover do modo discreto
                     if config['crossover'] == "blx":
                         child = blx_alpha_crossover(pai, mae, CromLim, config['modo'])
                     elif config['crossover'] == "one_point":
@@ -82,21 +73,24 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
                     idx_mae = np.where((base == mae).all(axis=1))[0][0]
                     child = pai if fit[idx_pai] > fit[idx_mae] else mae
 
-                new_base[i] = child
-                if config['modo'] == 'discrete':
-                    for j in range(bounds_shape):
-                        new_pop[i, j] = Crom[Names_CromLim[j]][child[j]]
-                else:
-                    new_pop[i, :] = child
+                # new_base[i] = child
+                # if config['modo'] == 'discrete':
+                #     for j in range(bounds_shape):
+                #         new_pop[i, j] = Crom[Names_CromLim[j]][child[j]]
+                # else:
+                #     new_pop[i, :] = child
             else:
-                _, new_pop[i], new_base[i] = newpop(1, CromLim, bounds_shape, Crom, Names_CromLim, config)
-
+                if config['modo'] == 'discrete':
+                    child = np.random.randint(CromLim[:, 0], CromLim[:, 1] + 1)
+                else:
+                    _, child, _ = newpop(1, CromLim, bounds_shape, config)
+                    child = child[0]
+            
+            new_base[i] = child
             i += 1
 
-        if config['modo'] == 'discrete':
-            new_pop_idx = new_base 
-        else:
-            new_pop_idx = None
+        new_pop = None if config['modo'] == 'discrete' else new_base
+        new_pop_idx = new_base if config['modo'] == 'discrete' else None
 
         return new_pop, new_pop_idx
     else:
