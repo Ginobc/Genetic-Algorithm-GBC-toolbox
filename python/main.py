@@ -9,9 +9,9 @@ config = {
     # modo: 'continuous' or 'discrete'
     'modo': 'continuous',   
     # modo_otimização: 'nsga2' or 'traditional'                  
-    'modo_otimizacao': 'traditional',       
+    'modo_otimizacao': 'nsga2',       
     # example_aname: sphere, easom, hadel, simple, real_multi (Multiobjective example), discrete_alloy (discrete example)
-    'exemple_name': 'easom',    
+    'exemple_name': 'real_multi',    
     # crossover: 'sbx', 'blx', 'one_point', 'two_point'           
     'crossover': 'blx',                     
 }
@@ -22,8 +22,8 @@ example = {
     'easom': easom_function,
     'hadel': hadel_function,
     'simple': simple_function,
-    'real_multi': real_multiobjective,
-    'discrete_alloy': discrete_alloy_optimization
+    'real_multi': real_multiobjective,              # example_name = real_multi & modo_otimizacao = nsga2
+    'discrete_alloy': discrete_alloy_optimization   # example_name = discrete_alloy
 }
 fit_function = example[config['exemple_name']]
 _, CromLim = fit_function(None)

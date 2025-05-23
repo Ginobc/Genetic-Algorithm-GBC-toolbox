@@ -42,16 +42,9 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
 
         # Initialization
         new_base = np.zeros_like(base)
-        new_base[:N_elit] = base[sorted_idx[:N_elit]]
-        # new_pop = np.zeros_like(pop)
 
         # # Elitism
-        # new_base[:N_elit] = base[sorted_idx[:N_elit]]
-        # if config['modo'] == 'discrete':
-        #     for j in range(bounds_shape):
-        #         new_pop[:, j] = Crom[Names_CromLim[j]][new_base[:, j]]
-        # else:
-        #     new_pop[:N_elit, :] = new_base[:N_elit, :]
+        new_base[:N_elit] = base[sorted_idx[:N_elit]]
 
         # Evolution (Crossover & Mutation)
         i = N_elit
@@ -72,13 +65,6 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
                     idx_pai = np.where((base == pai).all(axis=1))[0][0]
                     idx_mae = np.where((base == mae).all(axis=1))[0][0]
                     child = pai if fit[idx_pai] > fit[idx_mae] else mae
-
-                # new_base[i] = child
-                # if config['modo'] == 'discrete':
-                #     for j in range(bounds_shape):
-                #         new_pop[i, j] = Crom[Names_CromLim[j]][child[j]]
-                # else:
-                #     new_pop[i, :] = child
             else:
                 if config['modo'] == 'discrete':
                     child = np.random.randint(CromLim[:, 0], CromLim[:, 1] + 1)
@@ -160,6 +146,7 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
             new_pop.extend(front)
 
         selected = pop[new_pop]
+        Ncrom = pop.shape[1]
 
         # Cruzamento e mutação
         offspring = []
@@ -172,7 +159,7 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
             child = np.clip(child, CromLim[:, 0], CromLim[:, 1])
             offspring.append(child)
 
-        return np.array(offspring)
+        return np.array(offspring), None
 
 # Crossover strategies
 def blx_alpha_crossover(parent1, parent2, CromLim, modo, alpha=0.25):
