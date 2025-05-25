@@ -104,7 +104,8 @@ Genetic-Algorithm-GBC-toolbox/
   pip install -r requirements.txt
   ```
 - Run `main.py` to start the optimization.
-## Settings inside `main.py`
+
+### Settings inside `main.py`
 
 - **Mode**:
   - `'continuous'` – for floating-point variables.
@@ -123,7 +124,7 @@ Genetic-Algorithm-GBC-toolbox/
   - `'traditional'`: single-objective GA with fitness transformation.
   - `'nsga2'`: multi-objective NSGA-II (**supports 2 or 3 objectives**).
 
-## Python Modules
+### Python Modules
 
 - `example.py`: Contains test functions for single- and multi-objective problems.
 - `ga_core.py`: Unified core for both traditional GA and NSGA-II, including:
@@ -135,7 +136,7 @@ Genetic-Algorithm-GBC-toolbox/
   - Highlights representative solutions (`min_f1`, `min_f2`, `balanced`, `min_f3` when applicable).
 - `requirements.txt`: Python dependencies.
 
-## Evolutionary Strategies in Python
+### Evolutionary Strategies in Python
 
 Unified architecture for continuous and discrete problems using both traditional GA and NSGA-II.
 
