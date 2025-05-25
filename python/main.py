@@ -8,12 +8,12 @@ from ga_core import *
 config = {
     # modo: 'continuous' or 'discrete'
     'modo': 'continuous',   
-    # modo_otimização: 'nsga2' or 'traditional'                  
+    # modo_otimização: 'nsga2' (only continuous) or 'traditional'                  
     'modo_otimizacao': 'nsga2',       
-    # example_aname: sphere, easom, hadel, simple, real_multi (Multiobjective example), discrete_alloy (discrete example)
+    # example_aname: sphere, easom, hadel, simple, real_multi (Multiobjective example - for NSGA2), discrete_alloy (discrete example)
     'exemple_name': 'real_multi',    
-    # crossover: 'sbx', 'blx', 'one_point', 'two_point'           
-    'crossover': 'blx',                     
+    # crossover: 'sbx' (only continuous), 'blx', 'linear', 'one_point', 'two_point'           
+    'crossover': 'sbx',                     
 }
 
 # Mapping: example -> function

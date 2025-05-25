@@ -8,9 +8,19 @@ The goal of this toolbox is to search for the minimum or maximum of a specific f
 
 Implementations are currently available in MATLAB, Julia, and Python.
 
----
+## What’s New (Python Version)
 
-### How to Cite this Toolbox
+- 🆕 **SBX (Simulated Binary Crossover)** implemented, based on Deb & Agrawal (1995)  
+  Ideal for continuous multi-objective optimization (used in NSGA-II). Allows finer control of offspring distribution using the η (eta) parameter.
+
+- 🛠️ **Unified crossover interface** for all optimization modes (`traditional` and `nsga2`), allowing dynamic operator selection via `config`.
+
+- 🔍 **Improved NSGA-II structure**:
+  - Cleaner selection, crossover, and mutation stages  
+  - Easier to extend with new crossover or selection strategies  
+  - Better convergence behavior on benchmark functions such as `real_multiobjective`
+
+## How to Cite this Toolbox
 
 If you use this toolbox in your work, please cite it as follows:
 
@@ -70,45 +80,9 @@ Genetic-Algorithm-GBC-toolbox/
 
 ---
 
-## How to Run the GA Toolbox
+# How to Run the GA Toolbox
 
-### MATLAB
-
-- Navigate to the `matlab/` folder.
-- Open and run the `main.m` file in MATLAB.
-- When running, select one of the example functions inside `examples/`:
-  - `eason_function.m`
-  - `hadel_function.m`
-  - `simple_function.m`
-  - `sphere_function.m`
-- Configure the number of generations, chromosomes, and probabilities of decimation, elitism, mutation, and crossover.
-
-**Evolutionary strategies used:**
-- Roulette-Wheel selection
-- BLX-α crossover
-- Deterministic elitism and decimation.
-
----
-
-### Julia
-
-- Navigate to the `julia/` folder.
-- Install the necessary packages by typing:
-  ```julia
-  ] add JLD, Statistics, LinearAlgebra, Printf, Plots
-  ```
-- Run the `main.jl` file.
-- Configure optimization parameters and function bounds within the script.
-
-**Evolutionary strategies implemented:**
-- Roulette-Wheel selection
-- BLX-α crossover
-- Mutation
-- Elitism and decimation.
-
----
-
-### Python
+## Python
 
 - Navigate to the `python/` folder.
 - Install the requirements:
@@ -148,23 +122,72 @@ Genetic-Algorithm-GBC-toolbox/
   - Handles plotting and result display
 - `requirements.txt`: Lists dependencies.
 
+### Evolutionary Strategies in Python
+
+The Python version includes a unified and extensible architecture for both single- and multi-objective optimization, supporting both continuous and discrete variables.
+
+**Selection**:
+- Roulette-Wheel selection
+
+**Crossover Operators**:
+- **BLX-α crossover**: Suitable for both continuous and discretized numeric variables  
+- **Simulated Binary Crossover (SBX)**: Ideal for continuous multi-objective optimization, especially in NSGA-II. Configurable via the `eta` parameter (distribution index).
+- One-point crossover: Typically used for discrete or index-based problems  
+- Two-point crossover: Offers greater diversity in discrete optimization  
+- Linear convex crossover: Performs convex combinations between parents (used mainly for experimentation)
+
+**Mutation**:
+- For continuous variables: Gaussian additive mutation with bounds clipping  
+- For discrete variables: Uniform random mutation or sampling from bounds
+
+**Elitism**:
+- Best individuals are preserved between generations for consistent convergence
+
+**Decimation**:
+- A portion of the population is periodically regenerated to maintain diversity and avoid premature convergence
+
+**NSGA-II Features**:
+- Multi-objective support with real-valued variables  
+- Non-dominated sorting and Pareto front identification  
+- Crowding distance computation to ensure diverse Pareto sets  
+- Customizable crossover strategy (including SBX)  
+- Visual Pareto front plotted upon completion
+
 ---
 
-### Evolutionary Strategies in Python
-- **Selection**: Roulette-Wheel selection  
-- **Crossover Operators**:
-  - BLX-α crossover
-  - One-point crossover
-  - Two-point crossover
-- **Mutation**: Uniform random mutation  
-- **Elitism**: Best individuals are preserved between generations  
-- **Decimation**: Part of the population is periodically regenerated to maintain diversity  
-- **NSGA-II Features**:
-  - Multi-objective evaluation
-  - Non-dominated sorting into Pareto fronts
-  - Crowding distance to maintain solution diversity
-  - Pareto front plotted after final generation
-  - Objective values and corresponding input vector printed after optimization
+## MATLAB
+
+- Navigate to the `matlab/` folder.
+- Open and run the `main.m` file in MATLAB.
+- When running, select one of the example functions inside `examples/`:
+  - `eason_function.m`
+  - `hadel_function.m`
+  - `simple_function.m`
+  - `sphere_function.m`
+- Configure the number of generations, chromosomes, and probabilities of decimation, elitism, mutation, and crossover.
+
+**Evolutionary strategies used:**
+- Roulette-Wheel selection
+- BLX-α crossover
+- Deterministic elitism and decimation.
+
+---
+
+## Julia
+
+- Navigate to the `julia/` folder.
+- Install the necessary packages by typing:
+  ```julia
+  ] add JLD, Statistics, LinearAlgebra, Printf, Plots
+  ```
+- Run the `main.jl` file.
+- Configure optimization parameters and function bounds within the script.
+
+**Evolutionary strategies implemented:**
+- Roulette-Wheel selection
+- BLX-α crossover
+- Mutation
+- Elitism and decimation.
 
 ---
 

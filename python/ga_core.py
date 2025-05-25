@@ -26,6 +26,15 @@ def fitness(pop, fit_function, config, pop_idx):
     return OUTPUT, fit
 
 def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p_c, N_ind, CromLim, bounds_shape):
+    # Mapping of Crossover Operators
+    crossover_methods = {
+        'blx': lambda p1, p2: blx_alpha_crossover(p1, p2, CromLim, config['modo']),
+        'sbx': lambda p1, p2: sbx_crossover(p1, p2, CromLim),
+        'linear': linear_convex_crossover,
+        'one_point': one_point_crossover,
+        'two_point': two_point_crossover
+    }  
+
     if config['modo_otimizacao'] != 'nsga2':
         if config['modo'] == 'discrete':
             base = pop_idx
@@ -43,35 +52,30 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
         # Initialization
         new_base = np.zeros_like(base)
 
-        # # Elitism
+        # Elitism
         new_base[:N_elit] = base[sorted_idx[:N_elit]]
 
-        # Evolution (Crossover & Mutation)
+        # Evolution (Crossover & Mutation) - traditional
         i = N_elit
         while i < N_ind:
             if np.random.rand() >= p_m:
-                pai = base[seleciona[np.random.randint(0, N_ind)]]
-                mae = base[seleciona[np.random.randint(0, N_ind)]]
+                parent1 = base[seleciona[np.random.randint(0, N_ind)]]
+                parent2 = base[seleciona[np.random.randint(0, N_ind)]]
+
                 if np.random.rand() <= p_c:
-                    if config['crossover'] == "blx":
-                        child = blx_alpha_crossover(pai, mae, CromLim, config['modo'])
-                    elif config['crossover'] == "one_point":
-                        child = one_point_crossover(pai, mae)
-                    elif config['crossover'] == "two_point":
-                        child = two_point_crossover(pai, mae)
-                    else:
-                        raise ValueError("Invalid crossover type. Choose 'blx', 'one_point', or 'two_point'.")
+                    # Crossover
+                    child = crossover_methods[config['crossover']](parent1, parent2)
                 else:
-                    idx_pai = np.where((base == pai).all(axis=1))[0][0]
-                    idx_mae = np.where((base == mae).all(axis=1))[0][0]
-                    child = pai if fit[idx_pai] > fit[idx_mae] else mae
+                    idx_p1 = np.where((base == parent1).all(axis=1))[0][0]
+                    idx_p2 = np.where((base == parent2).all(axis=1))[0][0]
+                    child = parent1 if fit[idx_p1] > fit[idx_p2] else parent2
             else:
                 if config['modo'] == 'discrete':
                     child = np.random.randint(CromLim[:, 0], CromLim[:, 1] + 1)
                 else:
-                    _, child, _ = newpop(1, CromLim, bounds_shape, config)
-                    child = child[0]
-            
+                    _, new_sample, _ = newpop(1, CromLim, bounds_shape, config)
+                    child = new_sample[0]
+
             new_base[i] = child
             i += 1
 
@@ -148,20 +152,81 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
         selected = pop[new_pop]
         Ncrom = pop.shape[1]
 
-        # Cruzamento e mutação
+        # Crossover and Mutation (NSGA-II)
         offspring = []
+
         while len(offspring) < N_ind:
-            p1, p2 = selected[np.random.randint(len(selected), size=2)]
-            alpha = np.random.rand()
-            child = alpha * p1 + (1 - alpha) * p2
-            mutation = np.random.normal(0, 0.1, Ncrom)
-            child += mutation
-            child = np.clip(child, CromLim[:, 0], CromLim[:, 1])
+            parent1, parent2 = selected[np.random.randint(len(selected), size=2)]
+            # Crossover
+            child = crossover_methods[config['crossover']](parent1, parent2)
+
+            # Mutation
+            if config['modo'] == 'continuous':
+                mutation = np.random.normal(0, 0.1, Ncrom)
+                child += mutation
+                child = np.clip(child, CromLim[:, 0], CromLim[:, 1])
+
             offspring.append(child)
+
 
         return np.array(offspring), None
 
 # Crossover strategies
+def sbx_crossover(parent1, parent2, CromLim, eta=15):
+    """
+    Simulated Binary Crossover (SBX) for continuous variables.
+    Adaptado do artigo de Deb et al. (2002), ideal para NSGA-II.
+
+    Parâmetros:
+    - parent1, parent2: Vetores dos pais (numpy array)
+    - CromLim: Limites das variáveis (Nx2)
+    - eta: Parâmetro de distribuição. Quanto maior, mais próximos dos pais
+    
+    Mecanismo:
+    - A distribuição de probabilidade do filho depende do quão perto ele está dos pais.
+    - O parâ metro η (eta) controla isso:
+        - η pequeno (ex: 2–5): filhos mais diversificados
+        - η grande (ex: 20–100): filhos mais próximos dos pais
+
+    Retorna:
+    - Um único filho (numpy array)
+    """
+    child = np.empty_like(parent1)
+    for i in range(len(parent1)):
+        x1, x2 = parent1[i], parent2[i]
+        xl, xu = CromLim[i, 0], CromLim[i, 1]
+
+        if np.random.rand() <= 0.5:
+            if abs(x1 - x2) > 1e-14:
+                if x1 > x2:
+                    x1, x2 = x2, x1
+                rand = np.random.rand()
+                beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
+                alpha = 2.0 - beta ** -(eta + 1)
+                if rand <= 1.0 / alpha:
+                    betaq = (rand * alpha) ** (1.0 / (eta + 1))
+                else:
+                    betaq = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
+                c1 = 0.5 * ((x1 + x2) - betaq * (x2 - x1))
+
+                beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
+                alpha = 2.0 - beta ** -(eta + 1)
+                if rand <= 1.0 / alpha:
+                    betaq = (rand * alpha) ** (1.0 / (eta + 1))
+                else:
+                    betaq = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
+                c2 = 0.5 * ((x1 + x2) + betaq * (x2 - x1))
+
+                c = c1 if np.random.rand() < 0.5 else c2
+                c = np.clip(c, xl, xu)
+            else:
+                c = x1
+        else:
+            c = x1
+
+        child[i] = c
+    return child
+
 def blx_alpha_crossover(parent1, parent2, CromLim, modo, alpha=0.25):
     beta = np.random.uniform(-alpha, 1 + alpha)
 
@@ -173,6 +238,11 @@ def blx_alpha_crossover(parent1, parent2, CromLim, modo, alpha=0.25):
     for k in range(CromLim.shape[0]):
         child[k] = np.clip(child[k], CromLim[k, 0], CromLim[k, 1])
 
+    return child
+
+def linear_convex_crossover(parent1, parent2):
+    alpha = np.random.rand()
+    child = alpha * parent1 + (1 - alpha) * parent2
     return child
 
 def one_point_crossover(parent1, parent2):
