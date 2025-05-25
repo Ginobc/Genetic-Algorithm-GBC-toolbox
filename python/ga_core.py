@@ -84,38 +84,36 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
 
         return new_pop, new_pop_idx
     else:
-        # Avaliar múltiplos objetivos
-        obj1 = np.zeros(N_ind)
-        obj2 = np.zeros(N_ind)
-        for i, ind in enumerate(pop):
+        # === Avaliação multiobjetivo (genérico para n ≥ 2) ===
+        obj_vals = []
+        for ind in pop:
             f, _ = fit_function(ind)
-            if isinstance(f, (int, float, np.number)):
-                obj1[i] = f
-                obj2[i] = f + 1.0
-            else:
-                obj1[i] = f[0]
-                obj2[i] = f[1]
+            obj_vals.append(f if isinstance(f, (list, np.ndarray)) else [f])
+        objs = np.array(obj_vals)
+        n_objs = objs.shape[1]
+        N_ind = objs.shape[0]
 
-        # Ordenação não dominada
-        domination_counts = np.zeros(N_ind)
+        # === Ordenação não dominada (generalizada) ===
+        domination_counts = np.zeros(N_ind, dtype=int)
         domination_sets = [[] for _ in range(N_ind)]
-        ranks = np.zeros(N_ind)
+        ranks = np.full(N_ind, np.inf)
         fronts = [[]]
 
         for p in range(N_ind):
             for q in range(N_ind):
-                if ((obj1[p] <= obj1[q] and obj2[p] <= obj2[q]) and
-                    (obj1[p] < obj1[q] or obj2[p] < obj2[q])):
+                if p == q:
+                    continue
+                if np.all(objs[p] <= objs[q]) and np.any(objs[p] < objs[q]):
                     domination_sets[p].append(q)
-                elif ((obj1[q] <= obj1[p] and obj2[q] <= obj2[p]) and
-                    (obj1[q] < obj1[p] or obj2[q] < obj2[p])):
+                elif np.all(objs[q] <= objs[p]) and np.any(objs[q] < objs[p]):
                     domination_counts[p] += 1
             if domination_counts[p] == 0:
                 ranks[p] = 0
                 fronts[0].append(p)
 
+        # Construção dos próximos fronts
         i = 0
-        while len(fronts[i]) > 0:
+        while i < len(fronts) and len(fronts[i]) > 0:
             next_front = []
             for p in fronts[i]:
                 for q in domination_sets[p]:
@@ -124,26 +122,33 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
                         ranks[q] = i + 1
                         next_front.append(q)
             i += 1
-            fronts.append(next_front)
+            if next_front:
+                fronts.append(next_front)
 
-        # Cálculo de crowding distance
-        def crowding_distance(obj1, obj2, front):
-            N = len(front)
-            distance = np.zeros(N)
-            for objs in [obj1, obj2]:
-                sorted_idx = np.argsort([objs[i] for i in front])
+        # === Cálculo de crowding distance (n objetivos) ===
+        def crowding_distance_multiobj(objs, front):
+            Nf = len(front)
+            distance = np.zeros(Nf)
+            if Nf == 0:
+                return distance
+            for m in range(objs.shape[1]):
+                obj_m = objs[:, m]
+                sorted_idx = np.argsort([obj_m[i] for i in front])
                 distance[sorted_idx[0]] = distance[sorted_idx[-1]] = float('inf')
-                for i in range(1, N - 1):
-                    prev_val = objs[front[sorted_idx[i - 1]]]
-                    next_val = objs[front[sorted_idx[i + 1]]]
-                    distance[sorted_idx[i]] += (next_val - prev_val) / (max(objs) - min(objs) + 1e-9)
-            return distance
-
-        # Seleção elitista baseada em dominância e distância
+                obj_min = np.min(obj_m)
+                obj_max = np.max(obj_m)
+                if obj_max - obj_min == 0:
+                    continue
+                for i in range(1, Nf - 1):
+                    prev_val = obj_m[front[sorted_idx[i - 1]]]
+                    next_val = obj_m[front[sorted_idx[i + 1]]]
+                    distance[sorted_idx[i]] += (next_val - prev_val) / (obj_max - obj_min)
+        
+        # === Seleção elitista baseada em dominância e distância ===
         new_pop = []
-        for front in fronts[:-1]:
+        for front in fronts:
             if len(new_pop) + len(front) > N_ind:
-                cd = crowding_distance(obj1, obj2, front)
+                cd = crowding_distance_multiobj(objs, front)
                 sorted_front = [front[i] for i in np.argsort(-cd)]
                 new_pop.extend(sorted_front[:N_ind - len(new_pop)])
                 break
@@ -152,11 +157,11 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
         selected = pop[new_pop]
         Ncrom = pop.shape[1]
 
-        # Crossover and Mutation (NSGA-II)
+        # === Crossover and Mutation (NSGA-II) ===
         offspring = []
-
         while len(offspring) < N_ind:
             parent1, parent2 = selected[np.random.randint(len(selected), size=2)]
+            
             # Crossover
             child = crossover_methods[config['crossover']](parent1, parent2)
 
@@ -168,9 +173,8 @@ def evolution_strategies(pop, fit_function, config, pop_idx, fit, p_elit, p_m, p
 
             offspring.append(child)
 
-
         return np.array(offspring), None
-
+    
 # Crossover strategies
 def sbx_crossover(parent1, parent2, CromLim, eta=15):
     """

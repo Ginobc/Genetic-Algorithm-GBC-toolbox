@@ -1,3 +1,7 @@
 numpy
 matplotlib
 ipykernel
+pandas
+openpyxl
+plotly
+nbformat

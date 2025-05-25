@@ -9,3 +9,7 @@ __pycache__/
 
 # Cache do VSCode (caso use)
 .vscode/
+
+# Results
+*.xlsx
+*.png

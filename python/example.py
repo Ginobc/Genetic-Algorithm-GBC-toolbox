@@ -36,6 +36,15 @@ def real_multiobjective(x):
     f2 = (x[0] - 2)**2 + (x[1] + 1)**2
     return [f1, f2], bounds
 
+def real_multiobjective_2(x):
+    bounds = np.array([[-2, 4], [-3, 3]])
+    if x is None:
+        return None, bounds
+    f1 = x[0]**2 + x[1]**2
+    f2 = (x[0] - 2)**2 + (x[1] + 1)**2
+    f3 = (x[0] + 1)**2 + (x[1] - 2)**2
+    return [f1, f2, f3], bounds
+
 def discrete_alloy_optimization(x):
     """
     Otimização discreta de composição de liga metálica com 3 metais.

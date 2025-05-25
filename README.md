@@ -8,17 +8,31 @@ The goal of this toolbox is to search for the minimum or maximum of a specific f
 
 Implementations are currently available in MATLAB, Julia, and Python.
 
+---
+
 ## What’s New (Python Version)
 
-- 🆕 **SBX (Simulated Binary Crossover)** implemented, based on Deb & Agrawal (1995)  
-  Ideal for continuous multi-objective optimization (used in NSGA-II). Allows finer control of offspring distribution using the η (eta) parameter.
+- 🧠 **NSGA-II extended for 2 or 3 objectives**
+  - Generalized non-dominated sorting and crowding distance
+  - Supports both 2D and 3D Pareto front visualization
 
-- 🛠️ **Unified crossover interface** for all optimization modes (`traditional` and `nsga2`), allowing dynamic operator selection via `config`.
+- 🆕 **SBX crossover** added (Deb & Agrawal, 1995)
+  - Ideal for continuous multi-objective optimization via NSGA-II
+  - Configurable η parameter for offspring distribution
 
-- 🔍 **Improved NSGA-II structure**:
-  - Cleaner selection, crossover, and mutation stages  
-  - Easier to extend with new crossover or selection strategies  
-  - Better convergence behavior on benchmark functions such as `real_multiobjective`
+- 🛠️ **Unified crossover logic**
+  - Shared interface for traditional and NSGA-II modes
+  - Dynamic selection via `config['crossover']`
+
+- 📊 **Enhanced Pareto front analysis**
+  - Uses only non-dominated solutions for plotting
+  - Annotated 2D plots and interactive 3D Plotly visualization
+  - Representative solutions: `min_f1`, `min_f2`, `min_f3`, `balanced`
+
+- 📌 **New test case**: `real_multiobjective_2`
+  - 3-objective benchmark with distance-based targets
+
+---
 
 ## How to Cite this Toolbox
 
@@ -90,68 +104,66 @@ Genetic-Algorithm-GBC-toolbox/
   pip install -r requirements.txt
   ```
 - Run `main.py` to start the optimization.
+## Settings inside `main.py`
 
-**Settings inside `main.py`:**
-- Select the **mode**:
-  - `'continuous'` for floating-point variables.
-  - `'discrete'` for grouped/discrete variable optimization.
-- Select the **example function**:
-  - `'sphere'`: standard continuous benchmark function (unimodal, convex).
+- **Mode**:
+  - `'continuous'` – for floating-point variables.
+  - `'discrete'` – for integer-indexed or grouped variables (e.g., materials or standard thicknesses).
+
+- **Example Function**:
+  - `'sphere'`: unimodal, convex benchmark function.
   - `'easom'`: multimodal function with a sharp global minimum.
-  - `'hadel'`: nonlinear function combining polynomial and trigonometric terms.
-  - `'simple'`: a parabolic function with cross-product terms.
-  - `'real_multi'`: two-objective continuous function used for NSGA-II testing.
-  - `'discrete_alloy'`: discrete optimization example using integer-indexed variables. Each variable represents a standardized material thickness or dimension. The input vector consists of integer indices, and the evaluation function computes a weighted cost, material strength, and density. The goal is to minimize a cost-strength objective while penalizing high-density solutions, simulating a constrained materials engineering design scenario.
+  - `'hadel'`: nonlinear function with polynomial and trigonometric terms.
+  - `'simple'`: parabolic surface with a cross-product term.
+  - `'real_multi_2v'`: two-objective continuous function for NSGA-II testing.
+  - `'real_multi_3v'`: **three-objective** continuous function (benchmarking distances to three targets).
+  - `'discrete_alloy'`: discrete material selection problem optimizing cost, strength, and density.
 
-- Choose the **optimization strategy**:
-  - `'traditional'`: single-objective optimization using fitness transformation.
-  - `'nsga2'`: multi-objective optimization using NSGA-II (**implemented only in Python**).
+- **Optimization Strategy**:
+  - `'traditional'`: single-objective GA with fitness transformation.
+  - `'nsga2'`: multi-objective NSGA-II (**supports 2 or 3 objectives**).
 
-### Python Modules
-- `example.py`: Contains benchmark functions for testing the GA, including:
-  - Single-objective: `sphere`, `eason`, `hadel`, `simple`
-  - Multi-objective: `real_multiobjective`
-- `ga_core.py`: Unified module that implements:
-  - Traditional GA (single-objective)
-  - NSGA-II (multi-objective)
-  - Continuous and discrete variable handling
-  - All crossover and mutation logic
-- `main.py`: Entry point of the Python implementation.
-  - Configures optimization parameters via `config` dictionary
-  - Selects the mode (`'continuous'` or `'discrete'`)
-  - Handles plotting and result display
-- `requirements.txt`: Lists dependencies.
+## Python Modules
 
-### Evolutionary Strategies in Python
+- `example.py`: Contains test functions for single- and multi-objective problems.
+- `ga_core.py`: Unified core for both traditional GA and NSGA-II, including:
+  - Continuous and discrete variable handling.
+  - Crossover, mutation, and elitism logic.
+- `main.py`: Main execution script:
+  - Configures the problem, runs the GA, plots results.
+  - Exports Pareto-optimal solutions to Excel.
+  - Highlights representative solutions (`min_f1`, `min_f2`, `balanced`, `min_f3` when applicable).
+- `requirements.txt`: Python dependencies.
 
-The Python version includes a unified and extensible architecture for both single- and multi-objective optimization, supporting both continuous and discrete variables.
+## Evolutionary Strategies in Python
+
+Unified architecture for continuous and discrete problems using both traditional GA and NSGA-II.
 
 **Selection**:
-- Roulette-Wheel selection
+- Roulette-wheel based selection.
 
 **Crossover Operators**:
-- **BLX-α crossover**: Suitable for both continuous and discretized numeric variables  
-- **Simulated Binary Crossover (SBX)**: Ideal for continuous multi-objective optimization, especially in NSGA-II. Configurable via the `eta` parameter (distribution index).
-- One-point crossover: Typically used for discrete or index-based problems  
-- Two-point crossover: Offers greater diversity in discrete optimization  
-- Linear convex crossover: Performs convex combinations between parents (used mainly for experimentation)
+- `BLX-α`: for continuous and discretized variables.
+- `SBX`: Simulated Binary Crossover (ideal for NSGA-II, with configurable η).
+- One-point and two-point crossover: for discrete/indexed problems.
+- Linear convex: experimental, combines parents via convex interpolation.
 
 **Mutation**:
-- For continuous variables: Gaussian additive mutation with bounds clipping  
-- For discrete variables: Uniform random mutation or sampling from bounds
+- Gaussian mutation (continuous).
+- Uniform random mutation or re-sampling (discrete).
 
-**Elitism**:
-- Best individuals are preserved between generations for consistent convergence
+**Elitism and Diversity**:
+- Best individuals are preserved across generations.
+- **Decimation**: periodically regenerates part of the population to avoid premature convergence.
 
-**Decimation**:
-- A portion of the population is periodically regenerated to maintain diversity and avoid premature convergence
-
-**NSGA-II Features**:
-- Multi-objective support with real-valued variables  
-- Non-dominated sorting and Pareto front identification  
-- Crowding distance computation to ensure diverse Pareto sets  
-- Customizable crossover strategy (including SBX)  
-- Visual Pareto front plotted upon completion
+**NSGA-II (Multi-objective Optimization)**:
+- Non-dominated sorting for `n ≥ 2` objectives.
+- Crowding distance calculation to maintain Pareto front diversity.
+- Dynamic Pareto front generation.
+- Representative solutions extracted and annotated.
+- **Visualization**:
+  - 2D plots: using only non-dominated solutions (`f1 vs f2`, `f1 vs f3`).
+  - 3D plot (Plotly): when optimizing 3 objectives (`f1 × f2 × f3`), with uniform axis scaling.
 
 ---
 
